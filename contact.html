@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact & Feedback</title>
+
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #dfe9f3, #ffffff);
+    margin: 0;
+    padding: 0;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .container {
+    width: 90%;
+    max-width: 430px;
+    background: #fff;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    text-align: center;
+    transition: transform 0.3s ease;
+  }
+
+  .container:hover {
+    transform: scale(1.02);
+  }
+
+  h2 {
+    margin-top: 0;
+    color: #1d3557;
+  }
+
+  textarea, input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: none;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  button {
+    margin-top: 15px;
+    width: 100%;
+    padding: 10px;
+    background: #1d3557;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  button:hover {
+    background: #457b9d;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .stars {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+  }
+
+  .star {
+    font-size: 32px;
+    cursor: pointer;
+    color: #ccc;
+    transition: 0.3s;
+    padding: 0 3px;
+  }
+
+  .star.selected {
+    color: gold;
+    transform: scale(1.2);
+  }
+
+  .emoji-container {
+    margin-top: 10px;
+  }
+
+  .emoji {
+    font-size: 30px;
+    cursor: pointer;
+    margin: 0 6px;
+    opacity: 0.4;
+    transition: 0.2s;
+  }
+
+  .emoji.selected {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+
+  .success-box, .error-box {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    line-height: 1.6;
+  }
+
+  .success-box {
+    border-left: 6px solid #457b9d;
+    background: #f2f8ff;
+  }
+
+  .error-box {
+    border-left: 6px solid #e63946;
+    background: #ffe5e5;
+  }
+
+  .redirect-note {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #888;
+  }
+</style>
+</head>
+
+<body>
+<div class="container" id="formBox">
+  <h2>Contact & Feedback</h2>
+
+  <p>Rate our App:</p>
+  <div class="stars" id="starContainer">
+    <span class="star" data-val="1">★</span>
+    <span class="star" data-val="2">★</span>
+    <span class="star" data-val="3">★</span>
+    <span class="star" data-val="4">★</span>
+    <span class="star" data-val="5">★</span>
+  </div>
+
+  <p>Mood:</p>
+  <div class="emoji-container" id="emojiContainer">
+    <span class="emoji" data-mood="😡">😡</span>
+    <span class="emoji" data-mood="😕">😕</span>
+    <span class="emoji" data-mood="🙂">🙂</span>
+    <span class="emoji" data-mood="😀">😀</span>
+    <span class="emoji" data-mood="😍">😍</span>
+  </div>
+
+  <textarea id="msg" rows="5" placeholder="Write your feedback..."></textarea>
+
+  <button onclick="submitForm()">Submit</button>
+</div>
+
+<div class="container hidden" id="resultBox">
+  <div class="success-box" id="goodResponse">
+    ✅ <b>Thank you for your response ❤️</b><br><br>
+    We are happy to hear this feedback from you!<br><br>
+    📞 For further details contact: <b>9876543210</b><br>
+    📧 Email: <b>traffic.management@gmail.com</b>
+    <p class="redirect-note">Redirecting you to home page...</p>
+  </div>
+
+  <div class="error-box hidden" id="badResponse">
+    😞 <b>We’re sorry to hear this from you.</b><br><br>
+    Please tell us what went wrong with our service below:
+    <textarea id="badFeedback" rows="4" placeholder="Write your concern..."></textarea><br>
+    <button onclick="submitBadFeedback()">Submit</button>
+  </div>
+
+  <div class="success-box hidden" id="finalBadResponse">
+    ✅ Your response has been submitted.<br><br>
+    We’ll try to rectify the problems soon.<br><br>
+    📞 For further details call: <b>9876543210</b><br>
+    📧 Email: <b>traffic.management@gmail.com</b>
+    <p class="redirect-note">Redirecting you to home page...</p>
+  </div>
+</div>
+
+<script>
+  let rating = 0;
+  let emojiMood = "";
+
+  // ⭐ STAR RATING
+  document.querySelectorAll(".star").forEach(star => {
+    star.addEventListener("click", function() {
+      rating = this.getAttribute("data-val");
+      highlightStars(rating);
+    });
+  });
+
+  function highlightStars(r) {
+    document.querySelectorAll(".star").forEach(star => {
+      star.classList.remove("selected");
+      if (star.getAttribute("data-val") <= r) {
+        star.classList.add("selected");
+      }
+    });
+  }
+
+  // 😃 EMOJI SELECT
+  document.querySelectorAll(".emoji").forEach(emo => {
+    emo.addEventListener("click", function() {
+      emojiMood = this.getAttribute("data-mood");
+      document.querySelectorAll(".emoji").forEach(e => e.classList.remove("selected"));
+      this.classList.add("selected");
+    });
+  });
+
+  // ✅ SUBMIT FORM
+  function submitForm() {
+    if (rating === 0) {
+      alert("Please select a rating!");
+      return;
+    }
+
+    document.getElementById("formBox").classList.add("hidden");
+    document.getElementById("resultBox").classList.remove("hidden");
+
+    if (rating <= 3) {
+      document.getElementById("goodResponse").classList.add("hidden");
+      document.getElementById("badResponse").classList.remove("hidden");
+    } else {
+      document.getElementById("goodResponse").classList.remove("hidden");
+      document.getElementById("badResponse").classList.add("hidden");
+      setTimeout(() => window.location.href = "index.html", 4000);
+    }
+  }
+
+  // 📩 SUBMIT BAD FEEDBACK
+  function submitBadFeedback() {
+    let text = document.getElementById("badFeedback").value.trim();
+    if (text === "") {
+      alert("Please share what went wrong.");
+      return;
+    }
+    document.getElementById("badResponse").classList.add("hidden");
+    document.getElementById("finalBadResponse").classList.remove("hidden");
+
+    setTimeout(() => window.location.href = "index.html", 5000);
+  }
+</script>
+
+</body>
+</html>

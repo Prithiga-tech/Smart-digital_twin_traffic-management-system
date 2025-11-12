@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Signup</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb, #90caf9);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      .container {
+        position: relative;
+        z-index: 1;
+        max-width: 400px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+
+      h2 {
+        font-family: "Brush Script MT", cursive;
+        font-size: 2.3em;
+        color: #1e3a8a;
+        margin-bottom: 15px;
+      }
+
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 0;
+        background: #007bff;
+        color: #fff;
+        cursor: pointer;
+        transition: 0.3s ease;
+      }
+
+      button:hover {
+        background: #0056b3;
+        transform: scale(1.03);
+      }
+
+      a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      p {
+        margin-top: 10px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Create Account</h2>
+      <form id="signupForm">
+        <input id="name" type="text" placeholder="Your Name" required />
+        <input id="email" type="email" placeholder="Email" required />
+        <input id="password" type="password" placeholder="Password" required />
+        <button type="submit">Sign Up</button>
+      </form>
+      <p>Already have an account? <a href="login.html">Login</a></p>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+      import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+      import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAu7pDAiYNWGWXxCUom0_uiTx2omigT7Ec",
+        authDomain: "smart-city-traffic-app-fa8f3.firebaseapp.com",
+        projectId: "smart-city-traffic-app-fa8f3",
+        storageBucket: "smart-city-traffic-app-fa8f3.appspot.com",
+        messagingSenderId: "858416744357",
+        appId: "1:858416744357:web:703b8145711372a04cca4c",
+        measurementId: "G-TFTDBVWDH3",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      document.getElementById("signupForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!name || !email || !password) {
+          alert("Please fill in all fields!");
+          return;
+        }
+
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+
+          await setDoc(doc(db, "users", user.uid), {
+            name: name,
+            email: email,
+            createdAt: new Date().toISOString(),
+          });
+
+          alert("✅ Signup successful! Redirecting to Traffic Page...");
+          setTimeout(() => {
+            window.location.href = "trafficdata.html";
+          }, 1500);
+        } catch (error) {
+          console.error("Signup error:", error);
+          alert("❌ Error: " + error.message);
+        }
+      });
+    </script>
+  </body>
+</html>

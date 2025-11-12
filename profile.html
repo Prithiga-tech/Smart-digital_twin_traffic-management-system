@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profile</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #74b9ff, #a29bfe, #81ecec);
+      background-size: 400% 400%;
+      animation: gradientBG 12s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      width: 360px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px 20px;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .container:hover {
+      transform: translateY(-5px);
+    }
+
+    /* ✅ BIGGER ROUND PROFILE PIC */
+    .profile-pic {
+      width: 150px;     /* increased */
+      height: 150px;    /* increased */
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid #6c5ce7;
+      box-shadow: 0 0 15px rgba(108, 92, 231, 0.7);
+      margin-bottom: 15px;
+    }
+
+    h2 {
+      color: #2d3436;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 15px;
+      color: #2d3436;
+      margin: 6px 0;
+    }
+
+    .highlight {
+      font-weight: 600;
+      color: #6c5ce7;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      background: #6c5ce7;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #5b4dd1;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 15px;
+      text-decoration: none;
+      color: #0984e3;
+      font-weight: 500;
+    }
+
+    .login-time {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #636e72;
+      font-style: italic;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <img src="https://i.pinimg.com/736x/8f/b4/cc/8fb4cc8f8c3b8cc0f5e6bfe868e3b7e3.jpg" 
+         alt="Profile Picture" class="profile-pic" />
+
+    <h2>Welcome, <span id="userName" class="highlight"></span> 👋</h2>
+    <p><b>Email:</b> <span id="userEmail"></span></p>
+    <p><b>Joined:</b> <span id="created"></span></p>
+    <p class="login-time"><b>Login Time:</b> <span id="loginTime"></span></p>
+
+    <button onclick="logout()">Logout</button>
+    <a class="back" href="trafficdata.html">← Back to Dashboard</a>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAu7pDAiYNWGWXxCUom0_uiTx2omigT7Ec",
+      authDomain: "smart-city-traffic-app-fa8f3.firebaseapp.com",
+      projectId: "smart-city-traffic-app-fa8f3",
+      storageBucket: "smart-city-traffic-app-fa8f3.appspot.com",
+      messagingSenderId: "858416744357",
+      appId: "1:858416744357:web:703b8145711372a04cca4c",
+      measurementId: "G-TFTDBVWDH3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        const docSnap = await getDoc(doc(db, "users", user.uid));
+        if (docSnap.exists()) {
+          document.getElementById("userName").textContent = docSnap.data().name;
+          document.getElementById("userEmail").textContent = docSnap.data().email;
+          document.getElementById("created").textContent = docSnap.data().createdAt.substring(0,10);
+        }
+
+        const now = new Date();
+        const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById("loginTime").textContent = formattedTime;
+      }
+    });
+
+    function logout() {
+      signOut(auth).then(() => {
+        window.location.href = "login.html";
+      });
+    }
+  </script>
+</body>
+</html>

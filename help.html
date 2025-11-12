@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Help & Instructions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #74b9ff, #a29bfe, #81ecec);
+      background-size: 400% 400%;
+      animation: gradientBG 12s ease infinite;
+      color: #333;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .box {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      max-width: 500px;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .box:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2d3436;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #2d3436;
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 25px;
+      text-decoration: none;
+      background-color: #6c5ce7;
+      color: white;
+      padding: 10px 0;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+
+    a:hover {
+      background-color: #5b4dd1;
+    }
+
+    .help-image {
+      width: 250px;
+      height: auto;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .contact {
+      margin-top: 25px;
+      text-align: center;
+      color: #2d3436;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .management-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #6c5ce7;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s ease;
+    }
+
+    .management-btn:hover {
+      background: #5b4dd1;
+    }
+
+    .contact-box {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 15px;
+      background: white;
+      border: 1px solid #dcdde1;
+      border-radius: 10px;
+      padding: 12px;
+      width: 240px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-size: 14px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .contact-box p {
+      margin: 6px 0;
+      color: #2d3436;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Help Icon" class="help-image">
+
+    <div class="box">
+      <button class="management-btn" onclick="toggleContact()">Management</button>
+      <div id="contactBox" class="contact-box">
+        <p><b>📧 Email:</b> traffic.management@example.com</p>
+        <p><b>📞 Phone:</b> +91 98765 43210</p>
+      </div>
+
+      <h2>How to Use</h2>
+      
+      <p>✅ Enter your Start and End area in the Traffic Map page.</p>
+      <p>✅ Based on Google Sheets data, traffic will be shown as:</p>
+
+      <p>🟥 <b>High</b> – Try alternate routes.</p>
+      <p>🟧 <b>Medium</b> – Some delays expected.</p>
+      <p>🟩 <b>Low</b> – Safe to travel.</p>
+
+      <p>📌 Dashboard shows all monitored routes.</p>
+      <p>📡 Alert popup appears when heavy congestion is detected.</p>
+
+      <div class="contact">
+        📞 For further details, call our management.
+      </div>
+
+      <a href="trafficdata.html">← Back</a>
+    </div>
+  </div>
+
+  <script>
+    function toggleContact() {
+      const box = document.getElementById("contactBox");
+      box.style.display = box.style.display === "block" ? "none" : "block";
+    }
+  </script>
+</body>
+</html>

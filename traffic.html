@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vellore Smart City Traffic</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+
+    <style>
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: linear-gradient(to right, #e3f2fd, #fce4ec);
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 25px;
+        background: #ffffffd9;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 24px;
+        font-family: "Brush Script MT", cursive;
+      }
+
+      .dashboard-btn,
+      .rules-btn {
+        background: #ff6f61;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.3s ease;
+      }
+
+      .dashboard-btn:hover,
+      .rules-btn:hover {
+        background: #e64a19;
+      }
+
+      #map {
+        height: 400px;
+        width: 90%;
+        margin: 20px auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .container {
+        width: 90%;
+        max-width: 600px;
+        margin: 20px auto;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      label {
+        display: block;
+        margin-top: 15px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      input,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 8px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+
+      #result {
+        margin-top: 15px;
+        padding: 10px;
+        text-align: center;
+        border-radius: 8px;
+        color: white;
+        font-weight: bold;
+      }
+
+      /* Modal styling */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+      }
+
+      .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 25px;
+        border-radius: 15px;
+        width: 80%;
+        max-width: 600px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        text-align: left;
+        font-family: "Comic Sans MS", cursive;
+        line-height: 1.6;
+      }
+
+      .modal h2 {
+        text-align: center;
+        color: #d84315;
+      }
+
+      .close {
+        color: #d84315;
+        float: right;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .close:hover {
+        color: #000;
+      }
+
+      .header-buttons {
+        display: flex;
+        gap: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ✅ Top header with dashboard and rules buttons -->
+    <header>
+      <h1>🚦 Vellore Smart City Traffic</h1>
+      <div class="header-buttons">
+        <button class="rules-btn" onclick="openRules()">📘 Rules</button>
+        <button class="dashboard-btn" onclick="viewDashboard()">📊 Dashboard</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <label>Start Area</label>
+      <input type="text" id="start" placeholder="Enter start area" />
+
+      <label>End Area</label>
+      <input type="text" id="end" placeholder="Enter end area" />
+
+      <button onclick="checkTraffic()">Check Traffic</button>
+
+      <div id="result"></div>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Modal for Traffic Rules -->
+    <div id="rulesModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeRules()">&times;</span>
+        <h2>🚗 Traffic Rules to Follow</h2>
+        <ul>
+          <li>Always wear a seatbelt while driving.</li>
+          <li>Never use a mobile phone while driving.</li>
+          <li>Follow traffic lights and signals strictly.</li>
+          <li>Do not exceed the speed limit.</li>
+          <li>Always wear a helmet while riding a two-wheeler.</li>
+          <li>Do not drink and drive.</li>
+          <li>Give way to pedestrians at crossings.</li>
+          <li>Obey one-way and no-entry signs.</li>
+          <li>Use indicators while turning or changing lanes.</li>
+          <li>Keep your vehicle documents up to date.</li>
+          <li>Do not honk unnecessarily.</li>
+          <li>Park only in designated parking zones.</li>
+          <li>Maintain a safe distance from the vehicle ahead.</li>
+          <li>Respect traffic police instructions.</li>
+          <li>Always carry your driving license and RC book.</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      const sheetURL =
+        "https://script.google.com/macros/s/AKfycbzdAe7-CrAgqaH_TQdorGpHSsr2amBRB7VdHwWU74eCWMi7vLl49LxLJ2ah4cdRkHFI/exec";
+
+      const makeWebhookURL =
+        "https://hook.eu2.make.com/jkfhbz067qpdlwtgcbieircb7piu3qnb";
+
+      let map = L.map("map").setView([12.9165, 79.1325], 12);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+
+      let routeLine;
+
+      function viewDashboard() {
+        window.location.href = "dashboard.html";
+      }
+
+      function openRules() {
+        document.getElementById("rulesModal").style.display = "block";
+      }
+
+      function closeRules() {
+        document.getElementById("rulesModal").style.display = "none";
+      }
+
+      async function checkTraffic() {
+        const start = document.getElementById("start").value.trim();
+        const end = document.getElementById("end").value.trim();
+        const resultDiv = document.getElementById("result");
+
+        if (!start || !end) {
+          alert("Please enter both Start and End areas!");
+          return;
+        }
+
+        try {
+          const res = await fetch(sheetURL);
+          const data = await res.json();
+
+          const match = data.find(
+            (row) =>
+              row.Start.toLowerCase() === start.toLowerCase() &&
+              row.End.toLowerCase() === end.toLowerCase()
+          );
+
+          if (routeLine) map.removeLayer(routeLine);
+
+          if (match) {
+            let color, message;
+            if (match.Traffic_Level.toLowerCase() === "high") {
+              color = "red";
+              message = `⚠️ High Traffic from ${start} to ${end}. Finding alternate route...`;
+              resultDiv.style.background = color;
+              resultDiv.textContent = message;
+              sendAlert(start, end, match.Traffic_Level);
+              drawRoute(start, end, true);
+            } else if (match.Traffic_Level.toLowerCase() === "medium") {
+              color = "orange";
+              message = `🚗 Medium Traffic from ${start} to ${end}.`;
+              resultDiv.style.background = color;
+              resultDiv.textContent = message;
+              drawRoute(start, end, false);
+            } else {
+              color = "green";
+              message = `✅ Low Traffic from ${start} to ${end}.`;
+              resultDiv.style.background = color;
+              resultDiv.textContent = message;
+              drawRoute(start, end, false);
+            }
+          } else {
+            resultDiv.style.background = "gray";
+            resultDiv.textContent = "❌ No route data found.";
+          }
+        } catch (err) {
+          alert("Error loading traffic data or route.");
+          console.error(err);
+        }
+      }
+
+      async function sendAlert(start, end, level) {
+        try {
+          await fetch(makeWebhookURL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              start_area: start,
+              end_area: end,
+              traffic_level: level,
+              alert: `High traffic detected from ${start} to ${end}`,
+            }),
+          });
+          console.log("Alert sent to Make.com");
+        } catch (err) {
+          console.error("Error sending alert to Make.com:", err);
+        }
+      }
+
+      async function drawRoute(start, end, suggestAlternate) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=`;
+        const [startData, endData] = await Promise.all([
+          fetch(url + start).then((r) => r.json()),
+          fetch(url + end).then((r) => r.json()),
+        ]);
+
+        if (!startData[0] || !endData[0]) {
+          alert("Could not find location on map.");
+          return;
+        }
+
+        const startLatLng = [startData[0].lat, startData[0].lon];
+        const endLatLng = [endData[0].lat, endData[0].lon];
+
+        const routeUrl = `https://router.project-osrm.org/route/v1/driving/${startLatLng[1]},${startLatLng[0]};${endLatLng[1]},${endLatLng[0]}?overview=full&geometries=geojson`;
+
+        const routeRes = await fetch(routeUrl);
+        const routeData = await routeRes.json();
+
+        if (routeData.routes && routeData.routes.length > 0) {
+          const coords = routeData.routes[0].geometry.coordinates.map((c) => [
+            c[1],
+            c[0],
+          ]);
+          routeLine = L.polyline(coords, {
+            color: suggestAlternate ? "red" : "green",
+            weight: 5,
+          }).addTo(map);
+
+          map.fitBounds(routeLine.getBounds());
+
+          if (suggestAlternate) {
+            L.marker(startLatLng)
+              .addTo(map)
+              .bindPopup("Start (High Traffic Area)")
+              .openPopup();
+            L.marker(endLatLng).addTo(map).bindPopup("Destination");
+
+            alert(
+              `🚧 High traffic detected on this route.\nSuggested alternate: Try nearby roads around ${start}.`
+            );
+          }
+        } else {
+          alert("No route found between these points.");
+        }
+      }
+    </script>
+  </body>
+</html>
